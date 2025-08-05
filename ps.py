@@ -1,61 +1,45 @@
 from collections import deque
-import copy
+
+M,N=map(int,input().split())
 arr=[]
-visited=set()
-for _ in range(3):
+visited = [[[False for _ in range(5)] for _ in range(N)] for _ in range(M)]
+for _ in range(M):
     line=list(map(int,input().split()))
     arr.append(line)
 
-def arrToStr(arr):
-    state=''
-    for i in range(3):
-        for j in range(3):
-            state+=str(arr[i][j])
-    return state
-
-def strToArr(str):
-    result=[]
-    line=[]
-    for i in range(9):
-        line.append(int(str[i]))
-        if len(line)==3:
-            result.append(line)
-            line=[]
-    return result
-
-def findZero(arr):
-    for i in range(3):
-        for j in range(3):
-            if arr[i][j]==0:
-                return (i,j)
-
+sy, sx, sd = map(int, input().split())
+sy-=1
+sx-=1
+ey, ex, ed = map(int, input().split())
+ey-=1
+ex-=1
+#동서남북순
+dy=[0,0,1,-1]
 dx=[1,-1,0,0]
-dy=[0,0,1,-1]      
-def isInArr(i,j):
-    return 0<=i<3 and 0<=j<3
 
-isSuccess=False
-q=deque([(arrToStr(arr),0)])
-visited.add(arrToStr(arr))
+q=deque([(sy,sx,sd,0)])
+visited[sy][sx][sd]=True
+
+dirdic={1:(3,4),2:(4,3),3:(2,1),4:(1,2)}
 while q:
-    state,count=q.popleft()
-    if state=='123456780':
-        isSuccess=True
-        print(count)
+    y,x,d,cnt=q.popleft()    
+    if (y, x, d) == (ey, ex, ed):
+        print(cnt)
         break
-    arr=strToArr(state)
-    i,j=findZero(arr)
-    for k in range(4):
-        if isInArr(i+dy[k],j+dx[k]):
-            newArr=copy.deepcopy(arr)
-            newArr[i][j],newArr[i+dy[k]][j+dx[k]]=newArr[i+dy[k]][j+dx[k]],newArr[i][j]
-            newState=arrToStr(newArr)
-            if newState not in visited:
-                visited.add(newState)
-                q.append((newState,count+1))
+    for k in range(1,4):
+        ny = y + dy[d - 1] * k
+        nx = x + dx[d - 1] * k
+    
+        if 0 <= ny < M and 0 <= nx < N and arr[ny][nx] == 0:
+            if not visited[ny][nx][d]:
+                visited[ny][nx][d] = True
+                q.append((ny, nx, d, cnt + 1))
+        else:
+            break
+    
+    for nd in dirdic[d]:
+        if not visited[y][x][nd]:
+            visited[y][x][nd]=True
+            q.append((y,x,nd,cnt+1))
 
-if not isSuccess:
-    print(-1)
-
-
-            
+    
