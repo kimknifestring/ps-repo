@@ -1,45 +1,71 @@
 from collections import deque
 
-M,N=map(int,input().split())
 arr=[]
-visited = [[[False for _ in range(5)] for _ in range(N)] for _ in range(M)]
-for _ in range(M):
-    line=list(map(int,input().split()))
+for _ in range(12):
+    line=list(input())
     arr.append(line)
 
-sy, sx, sd = map(int, input().split())
-sy-=1
-sx-=1
-ey, ex, ed = map(int, input().split())
-ey-=1
-ex-=1
-#동서남북순
-dy=[0,0,1,-1]
-dx=[1,-1,0,0]
+answer=0
 
-q=deque([(sy,sx,sd,0)])
-visited[sy][sx][sd]=True
+dy=[1,-1,0,0]
+dx=[0,0,1,-1]
 
-dirdic={1:(3,4),2:(4,3),3:(2,1),4:(1,2)}
-while q:
-    y,x,d,cnt=q.popleft()    
-    if (y, x, d) == (ey, ex, ed):
-        print(cnt)
+def debug():
+    for i in arr:
+        print(i)
+isBoom=False
+def BFS(X,Y,C,visited):
+    global isBoom
+    puyoN=1
+    coordinate=[]
+    q=deque([(X,Y,C)])
+    visited[Y][X]=True
+    coordinate.append((X,Y))
+    while q:
+        x,y,color=q.popleft()
+        for i in range(4):
+            nx,ny=x+dx[i],y+dy[i]
+            if 0<=nx<6 and 0<=ny<12 and not visited[ny][nx]:
+                if arr[ny][nx]==color:
+                    # print('연결된 같은 뿌요를 찾았다',ny,nx,arr[ny][nx])
+                    puyoN+=1
+                    # print(puyoN)
+                    visited[ny][nx]=True
+                    q.append((nx,ny,color))
+                    coordinate.append((nx,ny))
+    if puyoN>=4:
+        # print('터진다')
+        for x,y in coordinate:
+            arr[y][x]='.'
+        isBoom=True
+def down(X,Y):
+    dest_y=Y
+    while dest_y+1<12 and arr[dest_y+1][X]=='.':
+        dest_y+=1
+    if dest_y!=Y:
+        arr[dest_y][X] = arr[Y][X]
+        arr[Y][X] = '.'
+
+isPlus=True
+while isPlus:
+    # 터지는 거 하나라도 있는지 체크
+    visited=[[False for _ in range(6)] for _ in range(12)]
+    isBoom=False
+    for i in range(12):
+        for j in range(6):
+            if arr[i][j]!='.' and not visited[i][j]:
+                # print('뿌요를 찾았다',arr[i][j],visited)
+                BFS(j,i,arr[i][j],visited)
+    # 터졌으면 +1 연쇄
+    if isBoom:
+        # debug()
+        answer+=1
+    else:
+        isPlus=False
         break
-    for k in range(1,4):
-        ny = y + dy[d - 1] * k
-        nx = x + dx[d - 1] * k
-    
-        if 0 <= ny < M and 0 <= nx < N and arr[ny][nx] == 0:
-            if not visited[ny][nx][d]:
-                visited[ny][nx][d] = True
-                q.append((ny, nx, d, cnt + 1))
-        else:
-            break
-    
-    for nd in dirdic[d]:
-        if not visited[y][x][nd]:
-            visited[y][x][nd]=True
-            q.append((y,x,nd,cnt+1))
 
-    
+    for i in range(11,-1,-1):
+        for j in range(6):
+            if arr[i][j]!='.':
+                down(j,i)
+print(answer)
