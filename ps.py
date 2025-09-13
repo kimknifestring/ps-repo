@@ -1,33 +1,23 @@
-from collections import deque
-N,M=map(int,input().split())
-dic={}
-for _ in range(M):
-    A,B=map(int,input().split())
-    dic.setdefault(A,[]).append(B)
-    dic.setdefault(B,[]).append(A)
+N, C = map(int,input().split())
+li=[int(input()) for _ in range(N)]
+li.sort()
 
-kevinList=[0 for _ in range(N+1)]
+s, e = 1, li[-1] - li[0] 
+result = 0 
 
-def bfs(idx):
-    q=deque([(idx,0)])
-    visited=[False for _ in range(N+1)]
-    visited[idx]=True
-    retrunKevin=0
-    while q:
-        current,kevinBacon=q.popleft()
-        retrunKevin+=kevinBacon
-        if current in dic:
-            for i in dic[current]:
-                if not visited[i]:
-                    visited[i]=True
-                    q.append((i,kevinBacon+1))
-    kevinList[idx]=retrunKevin
+while s <= e:
+    mid = (s + e) // 2  
+    count = 1 
+    last_pos = li[0]
 
-for i in range(1,N+1):
-    bfs(i)
+    for i in range(1, N):
+        if li[i] >= last_pos + mid:
+            count += 1 
+            last_pos = li[i] 
+    if count >= C:
+        result = mid 
+        s = mid + 1
+    else:
+        e = mid - 1
 
-targetBaconNum=min(kevinList[1:])
-for i in range(1,N+1):
-    if kevinList[i]==targetBaconNum:
-        print(i)
-        break
+print(result)
