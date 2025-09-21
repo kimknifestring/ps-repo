@@ -1,23 +1,54 @@
-N, C = map(int,input().split())
-li=[int(input()) for _ in range(N)]
-li.sort()
+import sys
+input=sys.stdin.readline
+N, startATK = map(int,input().split())
+room = []
+for _ in range(N):
+    t, a, h = map(int,input().split())
+    room.append((t, a, h))
 
-s, e = 1, li[-1] - li[0] 
-result = 0 
+def battle(a,h):
+    global currentHP
+    global currentATK
+    global canThis
+    monsterATK = a
+    monsterHP = h
 
-while s <= e:
-    mid = (s + e) // 2  
-    count = 1 
-    last_pos = li[0]
-
-    for i in range(1, N):
-        if li[i] >= last_pos + mid:
-            count += 1 
-            last_pos = li[i] 
-    if count >= C:
-        result = mid 
-        s = mid + 1
+    attack_count = (monsterHP - 1) // currentATK
+    damage = monsterATK * attack_count
+    currentHP -= damage
+    if currentHP > 0:
+        return True
     else:
-        e = mid - 1
+        canThis = False
+        return False
 
-print(result)
+def potion(a,h):
+    global currentHP
+    global currentATK
+
+    currentATK += a
+    currentHP += h
+    if currentHP > midHP:
+        currentHP = midHP
+
+startHP = 1
+endHP = 10**18
+while startHP<=endHP:
+    canThis = True
+    midHP = (startHP+endHP)//2
+    currentHP = midHP
+    currentATK = startATK
+    
+    for t, a, h in room:
+        if t == 1:
+            if not battle(a,h):
+                break
+        else:
+            potion(a,h)
+
+    if not canThis:
+        startHP = midHP+1
+    else:
+        endHP = midHP-1
+
+print(startHP)
